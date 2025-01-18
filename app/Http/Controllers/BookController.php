@@ -9,14 +9,10 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = Book::with(['category', 'library']);
 
-        // Apply search filters
         if ($request->has('title')) {
             $query->where('title', 'like', '%' . $request->input('title') . '%');
         }
@@ -31,9 +27,6 @@ class BookController extends Controller
         return response()->success(new BookCollection($books), 'Books retrieved successfully', 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -55,9 +48,6 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $book = Book::select('id', 'title', 'author', 'isbn', 'stock', 'description', 'is_visible', 'price', 'image', 'category_id', 'library_id', 'added_by', 'created_at', 'updated_at')
@@ -75,9 +65,6 @@ class BookController extends Controller
         return response()->success(new BookResource($book), 'Book retrieved successfully');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Book $book)
     {
         $validated = $request->validate([
@@ -99,9 +86,6 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Book $book)
     {
         $book->delete();

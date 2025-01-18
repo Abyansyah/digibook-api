@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\NewsCategoryResource\Pages;
-use App\Filament\Resources\NewsCategoryResource\RelationManagers;
-use App\Models\NewsCategory;
+use App\Filament\Resources\EventCategoryResource\Pages;
+use App\Filament\Resources\EventCategoryResource\RelationManagers;
+use App\Models\EventCategory;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Textarea;
@@ -17,13 +17,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class NewsCategoryResource extends Resource
+class EventCategoryResource extends Resource
 {
-    protected static ?string $model = NewsCategory::class;
+    protected static ?string $model = EventCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationGroup = 'Berita';
+    protected static ?string $navigationGroup = 'Event';
+
+    protected static ?string $navigationLabel = 'Event Categories';
 
     public static function form(Form $form): Form
     {
@@ -31,11 +33,10 @@ class NewsCategoryResource extends Resource
             ->schema([
                 Card::make()
                     ->schema([
-                        TextInput::make('category_name')
+                        TextInput::make('name')
                             ->required()
                             ->label('Nama Kategori'),
                         Textarea::make('description')
-                            ->required()
                             ->label('Deskripsi'),
                     ])
             ]);
@@ -45,10 +46,9 @@ class NewsCategoryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('category_name')
-                    ->label('Nama Kategori'),
-                TextColumn::make('description')
-                    ->label('Deskripsi')
+                TextColumn::make('name')
+                    ->label('Nama Kategori')
+                    ->searchable()
             ])
             ->filters([
                 //
@@ -68,7 +68,7 @@ class NewsCategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageNewsCategories::route('/'),
+            'index' => Pages\ManageEventCategories::route('/'),
         ];
     }
 }

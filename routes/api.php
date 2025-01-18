@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookReviewController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\NewsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,5 +45,15 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [BookController::class, 'index']);
         Route::get('/{id}', [BookController::class, 'show']);
         Route::get('/{id}/reviews', [BookReviewController::class, 'index']);
+    });
+
+    Route::prefix('news')->group(function () {
+        Route::get('/', [NewsController::class, 'index']);
+        Route::get('/{id}', [NewsController::class, 'show']);
+    });
+
+    Route::prefix('events')->group(function () {
+        Route::get('/', [EventController::class, 'index']);
+        Route::get('/{id}', [EventController::class, 'show']);
     });
 });
