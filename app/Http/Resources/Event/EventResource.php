@@ -25,8 +25,13 @@ class EventResource extends JsonResource
             'event_mode' => $this->event_mode,
             'location' => $this->location,
             'participants_count' => $this->participants_count,
+            'i_registration' => $this->when(
+                auth('api')->check(),
+                fn() => $this->registrations()->where('user_id', auth('api')->id())->exists()
+            ),
             'category' => $this->eventType->name,
             'imageUrl' => $this->image ? url('storage/' . $this->image) : null,
+            'registeredCount' => $this->registrations()->count(),
             'created_at' => $this->created_at ? $this->created_at->toDateTimeString() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toDateTimeString() : null,
         ];

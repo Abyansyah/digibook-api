@@ -29,18 +29,26 @@ class EventController extends Controller
                 });
             }
 
-
             if ($request->has('event_mode')) {
                 $query->whereJsonContains('event_mode', $request->input('event_mode'));
             }
 
             $events = $query->paginate(10);
 
+            $user = auth('api')->user();
+
+            if ($user) {
+                foreach ($events->items() as $event) {
+                    $event->i_registration = $event->registrations()->where('user_id', $user->id)->exists();
+                }
+            }
+
             return response()->success(new EventCollection($events), 'Events retrieved successfully', 200);
         } catch (\Throwable $th) {
             return response()->error(['message' => $th->getMessage()], 500);
         }
     }
+
 
     public function show($id)
     {

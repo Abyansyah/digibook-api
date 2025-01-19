@@ -5,6 +5,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookReviewController;
 use App\Http\Controllers\EventCategoryController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventRegistrationController;
 use App\Http\Controllers\NewsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,11 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{id}', [BookController::class, 'destroy']);
             Route::post('/{book}/reviews', [BookReviewController::class, 'store']);
             Route::delete('reviews/{review}', [BookReviewController::class, 'destroy']);
+        });
+
+        Route::prefix('events')->group(function () {
+            // Route::get('/', [EventRegistrationController::class, 'index']); Dashboard
+            Route::post('/', [EventRegistrationController::class, 'store']);
         });
     });
 
