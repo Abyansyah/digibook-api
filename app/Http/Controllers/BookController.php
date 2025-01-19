@@ -13,16 +13,18 @@ class BookController extends Controller
     {
         $query = Book::with(['category', 'library']);
 
-        if ($request->has('title')) {
-            $query->where('title', 'like', '%' . $request->input('title') . '%');
+        if ($request->has('search')) {
+            $query->where('title', 'like', '%' . $request->input('search') . '%');
         }
 
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->input('category_id'));
+        if ($request->has('book_category')) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('category_name', 'like', '%' . $request->input('book_category') . '%');
+            });
         }
 
 
-        $books = $query->paginate(10);
+        $books = $query->paginate(12);
 
         return response()->success(new BookCollection($books), 'Books retrieved successfully', 200);
     }

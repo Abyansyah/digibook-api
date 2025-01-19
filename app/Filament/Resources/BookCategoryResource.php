@@ -45,13 +45,13 @@ class BookCategoryResource extends Resource
                     ->schema([
                         TextInput::make('category_name')
                             ->required()
+                            ->unique()
                             ->maxLength(255)
                             ->label('Nama Kategori'),
                         Textarea::make('description')
                             ->required()
                             ->label('Deskripsi'),
                         FileUpload::make('image')
-                            ->required()
                             ->label('Gambar')
                             ->image()
                             ->imageEditor()

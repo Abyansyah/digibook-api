@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\Event\EventCollection;
 use App\Http\Resources\Event\EventResource;
 use App\Models\Event;
+use App\Models\EventCategory;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -14,16 +15,18 @@ class EventController extends Controller
         try {
             $query = Event::with(['eventType']);
 
-            if ($request->has('title')) {
-                $query->where('title', 'like', '%' . $request->input('title') . '%');
+            if ($request->has('search')) {
+                $query->where('title', 'like', '%' . $request->input('search') . '%');
             }
 
             if ($request->has('status')) {
                 $query->where('status', $request->input('status'));
             }
 
-            if ($request->has('event_type_id')) {
-                $query->where('event_type_id', $request->input('event_type_id'));
+            if ($request->has('event_category')) {
+                $query->whereHas('eventType', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->input('event_category') . '%');
+                });
             }
 
 

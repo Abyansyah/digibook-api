@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookReviewController;
+use App\Http\Controllers\EventCategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\NewsController;
 use Illuminate\Http\Request;
@@ -56,4 +57,5 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [EventController::class, 'index']);
         Route::get('/{id}', [EventController::class, 'show']);
     });
+    Route::get('/event-categories', [EventCategoryController::class, 'index']);
 });
