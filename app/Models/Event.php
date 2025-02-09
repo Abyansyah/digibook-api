@@ -13,6 +13,7 @@ class Event extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'description',
         'start_date',
         'end_date',
@@ -21,7 +22,12 @@ class Event extends Model
         'image',
         'event_category_id',
         'location',
-        'event_mode'
+        'event_mode',
+        'start_time',
+        'end_time',
+        'event_overview',
+        'registration_date',
+        'registration_end_date',
     ];
 
     protected $casts = [

@@ -18,6 +18,7 @@ class EventResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'slug' => $this->slug,
             'description' => $this->description,
             'start_date' => Carbon::parse($this->start_date)->format('d F Y'),
             'end_date' => Carbon::parse($this->end_date)->format('d F Y'),
@@ -25,13 +26,20 @@ class EventResource extends JsonResource
             'event_mode' => $this->event_mode,
             'location' => $this->location,
             'participants_count' => $this->participants_count,
-            'i_registration' => $this->when(
+            'is_registration' => $this->when(
                 auth('api')->check(),
                 fn() => $this->registrations()->where('user_id', auth('api')->id())->exists()
             ),
             'category' => $this->eventType->name,
             'imageUrl' => $this->image ? url('storage/' . $this->image) : null,
+            'start_time' => Carbon::parse($this->start_time)->format('H:i'),
+            'end_time' => Carbon::parse($this->end_time)->format('H:i'),
+            'event_overview' => $this->event_overview,
             'registeredCount' => $this->registrations()->count(),
+            'registration_deadline' => $this->when(
+                Carbon::parse($this->end_date)->greaterThanOrEqualTo(Carbon::now()),
+                Carbon::now()->diffInDays(Carbon::parse($this->end_date), false)
+            ),
             'created_at' => $this->created_at ? $this->created_at->toDateTimeString() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toDateTimeString() : null,
         ];

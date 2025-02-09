@@ -18,7 +18,7 @@ class AuthHelper extends KHelper
                 return [
                     'status' => false,
                     'error' => ["Email or password is incorrect"],
-                    'code' => 401
+                    'code' => 400
                 ];
             }
         } catch (JWTException $e) {

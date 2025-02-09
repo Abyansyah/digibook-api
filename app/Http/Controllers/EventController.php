@@ -16,7 +16,7 @@ class EventController extends Controller
             $query = Event::with(['eventType']);
 
             if ($request->has('search')) {
-                $query->where('title', 'like', '%' . $request->input('search') . '%');
+                $query->where('slug', 'like', '%' . $request->input('search') . '%');
             }
 
             if ($request->has('status')) {
@@ -33,7 +33,8 @@ class EventController extends Controller
                 $query->whereJsonContains('event_mode', $request->input('event_mode'));
             }
 
-            $events = $query->paginate(10);
+            $perPage = $request->input('per_page', 10);
+            $events = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
             $user = auth('api')->user();
 
@@ -50,12 +51,28 @@ class EventController extends Controller
     }
 
 
-    public function show($id)
+
+    public function show($slug)
     {
         try {
-            $event = Event::with(['eventType'])->findOrFail($id);
+            $event = Event::with(['eventType'])->where('slug', $slug)->firstOrFail();
 
             return response()->success(new EventResource($event), 'Event retrieved successfully', 200);
+        } catch (\Throwable $th) {
+            return response()->error(['message' => $th->getMessage()], 500);
+        }
+    }
+
+    public function getEventByUSer()
+    {
+        try {
+            $user = auth('api')->user();
+
+            $events = Event::with(['eventType'])->whereHas('registrations', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->orderBy('created_at', 'desc')->get();
+
+            return response()->success(new EventCollection($events), 'Events retrieved successfully', 200);
         } catch (\Throwable $th) {
             return response()->error(['message' => $th->getMessage()], 500);
         }

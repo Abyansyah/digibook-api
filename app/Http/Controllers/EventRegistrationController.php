@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Filament\Resources\EventResource;
+use App\Http\Resources\EventRegistration\EventRegistrationCollection;
 use App\Models\EventRegistration;
 use Illuminate\Http\Request;
 
@@ -25,13 +27,12 @@ class EventRegistrationController extends Controller
             ], 400);
         }
 
-        $registration = EventRegistration::create([
+        EventRegistration::create([
             'user_id' => $userId,
             'event_id' => $validated['event_id'],
         ]);
 
         return response()->json([
-            'data' => $registration,
             'message' => 'Successfully registered for the event.',
         ], 201);
     }
@@ -44,8 +45,9 @@ class EventRegistrationController extends Controller
             ->where('user_id', $userId)
             ->get();
 
-        return response()->json([
-            'data' => $registrations,
-        ]);
+        return response()->success(
+            new EventResource($registrations),
+            'Event registrations retrieved successfully',
+        );
     }
 }

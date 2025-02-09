@@ -43,7 +43,7 @@ class BookCategoryResource extends Resource
             ->schema([
                 Card::make()
                     ->schema([
-                        TextInput::make('category_name')
+                        TextInput::make('name')
                             ->required()
                             ->unique()
                             ->maxLength(255)
@@ -72,7 +72,7 @@ class BookCategoryResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('image')->circular(),
-                TextColumn::make('category_name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable()
                     ->label('Nama Kategori'),

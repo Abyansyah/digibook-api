@@ -12,11 +12,12 @@ class News extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'content',
         'is_visible',
         'image',
         'author_id',
-        'category_id',
+        'category_id'
     ];
 
     public function author(): BelongsTo

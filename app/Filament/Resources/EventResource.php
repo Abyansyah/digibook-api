@@ -3,26 +3,25 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EventResource\Pages;
-use App\Filament\Resources\EventResource\RelationManagers;
 use App\Models\Event;
-use App\Models\EventCategory;
 use Carbon\Carbon;
-use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
+
 
 class EventResource extends Resource
 {
@@ -44,8 +43,21 @@ class EventResource extends Resource
                             ->schema([
                                 TextInput::make('title')
                                     ->required()
-                                    ->maxLength(255)
-                                    ->label('Nama Event'),
+                                    ->live(onBlur: true)
+                                    ->unique(ignoreRecord: true)
+                                    ->label('Nama Event')
+                                    ->afterStateUpdated(function (string $operation, $state, Set $set) {
+                                        if ($operation !== 'create') {
+                                            return;
+                                        }
+
+                                        $set('slug', Str::slug($state));
+                                    }),
+                                TextInput::make('slug')
+                                    ->required()
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->unique(Event::class, 'slug', ignoreRecord: true),
                                 TextInput::make('participants_count')
                                     ->required()
                                     ->numeric()
@@ -62,12 +74,98 @@ class EventResource extends Resource
 
                         Section::make('Jadwal Event')
                             ->schema([
+                                // DatePicker::make('registration_date')
+                                //     ->required()
+                                //     ->label('Waktu Pendaftaran')
+                                //     ->native(false)
+                                //     ->minDate(now()->toDateString())
+                                //     ->afterStateUpdated(function (Set $set) {
+                                //         $set('registration_end_date', null);
+                                //     }),
+
+                                // DatePicker::make('registration_end_date')
+                                //     ->required()
+                                //     ->label('Waktu Selesai Pendaftaran')
+                                //     ->native(false)
+                                //     ->dehydrated()
+                                //     ->minDate(function (callable $get) {
+                                //         $registration_date = $get('registration_date');
+                                //         if ($registration_date) {
+                                //             return $registration_date->addDay()->toDateString();
+                                //         }
+
+                                //         return now()->addDay()->toDateString();
+                                //     })
+                                //     ->rule('after:registration_date'),
+
                                 DatePicker::make('start_date')
                                     ->required()
-                                    ->label('Tanggal Mulai'),
+                                    ->label('Tanggal Mulai')
+                                    ->native(false)
+                                    ->minDate(function (callable $get) {
+                                        $startDate = $get('registration_end_date');
+
+                                        if ($startDate) {
+                                            return Carbon::parse($startDate)->addDay()->toDateString();
+                                        }
+
+                                        return now()->addDay()->toDateString();
+                                    })
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set) {
+                                        $set('end_date', null);
+                                    })
+                                    ->rule('after:registration_end_date'),
+
                                 DatePicker::make('end_date')
                                     ->required()
-                                    ->label('Tanggal Selesai'),
+                                    ->label('Tanggal Selesai')
+                                    ->native(false)
+                                    ->minDate(function (callable $get) {
+                                        $startDate = $get('start_date');
+
+                                        if ($startDate) {
+                                            return Carbon::parse($startDate)->addDay()->toDateString();
+                                        }
+
+                                        return now()->addDay()->toDateString();
+                                    })
+                                    ->rule('after:start_date'),
+                                TimePicker::make('start_time')
+                                    ->required()
+                                    ->label('Waktu Mulai')
+                                    ->rules([
+                                        function (callable $get) {
+                                            $startDate = $get('start_date');
+                                            if ($startDate && Carbon::parse($startDate)->isToday()) {
+                                                return 'after:' . now()->format('H:i');
+                                            }
+
+                                            return null;
+                                        }
+                                    ]),
+
+                                TimePicker::make('end_time')
+                                    ->required()
+                                    ->label('Waktu Selesai')
+                                    ->rules([
+                                        function (callable $get) {
+                                            $startDate = $get('start_date');
+                                            $endDate = $get('end_date');
+                                            $startTime = $get('start_time');
+
+                                            $rules = [];
+                                            if ($startDate && $endDate && ($startDate === $endDate)) {
+                                                $rules[] = 'after:' . $startTime;
+                                            }
+
+                                            if ($endDate && Carbon::parse($endDate)->isToday()) {
+                                                $rules[] = 'after:' . now()->format('H:i');
+                                            }
+
+                                            return $rules;
+                                        }
+                                    ]),
                             ])->columns(2),
                     ]),
                 Group::make()
@@ -88,7 +186,11 @@ class EventResource extends Resource
                                     ->label('Kategori Event')
                                     ->searchable()
                                     ->preload()
-                                    ->relationship('eventType', 'name')
+                                    ->relationship('eventType', 'name'),
+                                RichEditor::make('event_overview')
+                                    ->columnSpan('full')
+                                    ->required()
+                                    ->label('Detail Event'),
                             ])->columns(2),
 
                         Section::make('Image')

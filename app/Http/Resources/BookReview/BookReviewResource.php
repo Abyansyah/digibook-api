@@ -16,13 +16,11 @@ class BookReviewResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => [
-                'id' => $this->user->id,
-                'name' => $this->user->name,
-            ],
+            'user' => $this->user->name,
             'rating' => $this->rating,
             'comment' => $this->comment,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'avatar' => $this->user->foto,
+            'date' => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }
